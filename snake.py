@@ -1,8 +1,8 @@
+from multiprocessing.pool import RUN
 import pygame
 from position import Position
 from direction import Direction
 from game_state import GameState
-import random
 
 pygame.init()
 
@@ -11,6 +11,7 @@ CUBES_NUM = 20
 WIDTH = CUBE_SIZE * CUBES_NUM
 screen = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("Snake Game by Lucjan Konopka")
+game_speed = 10
 
 GRAY = (200, 200, 200)
 DARK_GRAY = (150, 150, 150)
@@ -19,34 +20,151 @@ BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 WHITE = (255, 255, 255)
-SNAKE_COLOR = (0, 153, 51)
+SNAKE_COLOR = (43, 110, 51)
 
 
 pygame.display.update()
 
 snake = [
-    Position(2, 2),
-    Position(3, 2),
-    Position(4, 2)
+    Position(-1, 2),
+    Position(0, 2),
+    Position(1, 2)
 ]
 
-food = Position(19, 19)
+food = Position(-1,-1)
 
 state = GameState(
     snake=None,
     direction=Direction.RIGHT,
     food=None,
     field_size=CUBES_NUM,
-    points=0
+    points=0,
+    speed=10
 )
 
 actual_score = state.points
 actual_direction = state.direction
+initial_tail_position = state.snake[0]
+end_tail_position = state.snake[0]
+initial_foretail_position = state.snake[1]
+end_foretail_position = state.snake[1]
+
+
+def pause_the_game():
+    text_upper = 'Game paused!'
+    text_lower = 'Press "space" to continue.'
+    pause_upper_text = pygame.font.SysFont(
+        'Consolas', 32).render(text_upper, True, BLACK)
+    pause_upper_text_rect = pause_upper_text.get_rect(
+        center=(WIDTH/2, WIDTH/2 - 20))
+    pause_lower_text = pygame.font.SysFont(
+        'Consolas', 32).render(text_lower, True, BLACK)
+    pause_lower_text_rect = pause_lower_text.get_rect(
+        center=(WIDTH/2, WIDTH/2 + 20))
+    fill_background(DARK_GRAY)
+    screen.blit(pause_upper_text, pause_upper_text_rect)
+    screen.blit(pause_lower_text, pause_lower_text_rect)
+    pygame.display.update()
+
+
+def game_over():
+    text_upper = 'Game Over!'
+    text_middle = f'Your score: {actual_score}.'
+    text_lower = 'Do you want to play again? (y/n)'
+    lost_upper_text = pygame.font.SysFont(
+        'Consolas', 32).render(text_upper, True, BLACK)
+    lost_upper_text_rect = lost_upper_text.get_rect(
+        center=(WIDTH/2, WIDTH/2 - 40))
+    lost_text_middle = pygame.font.SysFont(
+        'Consolas', 32).render(text_middle, True, SNAKE_COLOR)
+    lost_text_middle_rect = lost_text_middle.get_rect(
+        center=(WIDTH/2, WIDTH/2))
+    lost_lower_text = pygame.font.SysFont(
+        'Consolas', 32).render(text_lower, True, BLACK)
+    lost_lower_text_rect = lost_lower_text.get_rect(
+        center=(WIDTH/2, WIDTH/2 + 40))
+    fill_background(DARK_GRAY)
+    screen.blit(lost_upper_text, lost_upper_text_rect)
+    screen.blit(lost_text_middle, lost_text_middle_rect)
+    screen.blit(lost_lower_text, lost_lower_text_rect)
+    pygame.display.update()
 
 
 def draw_snake_part(pos):
     position = (pos.x * CUBE_SIZE, pos.y * CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)
     pygame.draw.rect(screen, SNAKE_COLOR, position)
+
+
+def check_snake_tail_actual_movement():
+    if initial_tail_position[0] == end_tail_position[0]:
+        if (initial_tail_position[1] > end_tail_position[1] and (initial_tail_position[1] != (CUBES_NUM - 1) or end_tail_position[1] != 0)) \
+                or (initial_tail_position[1] == 0 and end_tail_position[1] == (CUBES_NUM - 1)):
+            return 'up'
+        elif (initial_tail_position[1] < end_tail_position[1] and (initial_tail_position[1] != 0 or end_tail_position[1] != (CUBES_NUM - 1))) \
+                or (initial_tail_position[1] == (CUBES_NUM - 1) and end_tail_position[1] == 0):
+            return 'down'
+    if initial_tail_position[1] == end_tail_position[1]:
+        if (initial_tail_position[0] > end_tail_position[0] and (initial_tail_position[0] != (CUBES_NUM - 1) or end_tail_position[0] != 0)) \
+                or (initial_tail_position[0] == 0 and end_tail_position[0] == (CUBES_NUM - 1)):
+            return 'left'
+        elif (initial_tail_position[0] < end_tail_position[0] and (initial_tail_position[0] != 0 or end_tail_position[0] != (CUBES_NUM - 1))) \
+                or (initial_tail_position[0] == (CUBES_NUM - 1) and end_tail_position[0] == 0):
+            return 'right'
+
+
+def check_snake_foretail_actual_movement():
+    if initial_foretail_position[0] == end_foretail_position[0]:
+        if (initial_foretail_position[1] > end_foretail_position[1] and (initial_foretail_position[1] != (CUBES_NUM - 1) or end_foretail_position[1] != 0)) \
+                or (initial_foretail_position[1] == 0 and end_foretail_position[1] == (CUBES_NUM - 1)):
+            return 'up'
+        elif (initial_foretail_position[1] < end_foretail_position[1] and (initial_foretail_position[1] != 0 or end_foretail_position[1] != (CUBES_NUM - 1))) \
+                or (initial_foretail_position[1] == (CUBES_NUM - 1) and end_foretail_position[1] == 0):
+            return 'down'
+    if initial_foretail_position[1] == end_foretail_position[1]:
+        if (initial_foretail_position[0] > end_foretail_position[0] and (initial_foretail_position[0] != (CUBES_NUM - 1) or end_foretail_position[0] != 0)) \
+                or (initial_foretail_position[0] == 0 and end_foretail_position[0] == (CUBES_NUM - 1)):
+            return 'left'
+        elif (initial_foretail_position[0] < end_foretail_position[0] and (initial_foretail_position[0] != 0 or end_foretail_position[0] != (CUBES_NUM - 1))) \
+                or (initial_foretail_position[0] == (CUBES_NUM - 1) and end_foretail_position[0] == 0):
+            return 'right'
+
+
+def draw_snake_tail(pos):
+    tail_position = [[pos.x * CUBE_SIZE, pos.y * CUBE_SIZE], [pos.x * CUBE_SIZE, pos.y * CUBE_SIZE],
+                     [pos.x * CUBE_SIZE, pos.y * CUBE_SIZE], [pos.x * CUBE_SIZE, pos.y * CUBE_SIZE]]
+    # UP
+    if (check_snake_tail_actual_movement() == 'up' and check_snake_foretail_actual_movement() == 'up') \
+        or (check_snake_foretail_actual_movement() == 'up' and (check_snake_tail_actual_movement() == 'right' or check_snake_tail_actual_movement() == 'left')):
+        tail_position[1][0] += CUBE_SIZE - 1
+        tail_position[2][0] += 3/4*CUBE_SIZE
+        tail_position[2][1] += CUBE_SIZE
+        tail_position[3][0] += 1/4*CUBE_SIZE
+        tail_position[3][1] += CUBE_SIZE
+        # DOWN
+    elif (check_snake_tail_actual_movement() == 'down' and check_snake_foretail_actual_movement() == 'down') \
+        or (check_snake_foretail_actual_movement() == 'down' and (check_snake_tail_actual_movement() == 'right' or check_snake_tail_actual_movement() == 'left')):
+        tail_position[0][1] += CUBE_SIZE
+        tail_position[1][0] += 1/4*CUBE_SIZE
+        tail_position[2][0] += 3/4*CUBE_SIZE
+        tail_position[3][0] += CUBE_SIZE
+        tail_position[3][1] += CUBE_SIZE
+        # LEFT
+    elif check_snake_tail_actual_movement() == 'left' \
+        or (check_snake_foretail_actual_movement() == 'left' and (check_snake_tail_actual_movement() == 'up' or check_snake_tail_actual_movement() == 'down')):
+        tail_position[1][0] += CUBE_SIZE
+        tail_position[1][1] += 1/4*CUBE_SIZE
+        tail_position[2][0] += CUBE_SIZE
+        tail_position[2][1] += 3/4*CUBE_SIZE
+        tail_position[3][1] += CUBE_SIZE
+        # RIGHT
+    elif check_snake_tail_actual_movement() == 'right' \
+        or (check_snake_foretail_actual_movement() == 'right' and (check_snake_tail_actual_movement() == 'up' or check_snake_tail_actual_movement() == 'down')):
+        tail_position[0][0] += CUBE_SIZE
+        tail_position[1][1] += 1/4*CUBE_SIZE
+        tail_position[2][1] += 3/4*CUBE_SIZE
+        tail_position[3][0] += CUBE_SIZE
+        tail_position[3][1] += CUBE_SIZE
+    pygame.draw.polygon(screen, SNAKE_COLOR, tail_position)
 
 
 def draw_snake_head(pos, actual_direction):
@@ -80,32 +198,30 @@ def draw_snake_head(pos, actual_direction):
 
 
 def draw_food(pos):
-    radius = CUBE_SIZE / 2
+    radius = 2*CUBE_SIZE / 5
     position = (CUBE_SIZE * (pos.x + 0.5), CUBE_SIZE * (pos.y + 0.5))
     pygame.draw.circle(screen, RED, position, radius)
 
 
 def draw_snake(snake, actual_direction):
-    for part in snake[:-1]:
+    for part in snake[1:-1]:
         draw_snake_part(part)
     draw_snake_head(snake[-1], actual_direction)
+    draw_snake_tail(snake[0])
 
 
-def fill_background():
-    screen.fill(GRAY)
+def fill_background(color):
+    screen.fill(color)
 
 
 def draw_score(actual_score):
-    # position = (0, 0, WIDTH, CUBE_SIZE)
-    # pygame.draw.rect(screen, DARK_GRAY, position)
     score_text_font = pygame.font.SysFont("Comic Sans MS", 12)
     score_text = score_text_font.render(f"SCORE: {actual_score}", True, BLUE)
-    # score_text_rect = score_text.get_rect(center=(WIDTH/2, CUBE_SIZE/2))
     screen.blit(score_text, (10, 10))
 
 
-def draw(snake, food, actual_score):
-    fill_background()
+def draw(snake, food, actual_score, actual_direction):
+    fill_background(GRAY)
     draw_score(actual_score)
     draw_snake(snake, actual_direction)
     draw_food(food)
@@ -113,21 +229,29 @@ def draw(snake, food, actual_score):
     pygame.display.update()
 
 
-draw(snake, food, actual_score)
+draw(snake, food, actual_score, actual_direction)
 
 state.set_initial_position()
 
 clock = pygame.time.Clock()
+RUNNING, PAUSE = 0, 1
+game_state = RUNNING
 
 while True:
-    clock.tick(10)
-
+    clock.tick(game_speed)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit()
 
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                game_state = PAUSE
+            elif event.key == pygame.K_SPACE:
+                game_state = RUNNING
+            elif event.key == pygame.K_q:
+                quit()
+            elif event.key == pygame.K_UP:
                 state.snake_turn(Direction.UP)
             elif event.key == pygame.K_DOWN:
                 state.snake_turn(Direction.DOWN)
@@ -135,8 +259,21 @@ while True:
                 state.snake_turn(Direction.LEFT)
             elif event.key == pygame.K_RIGHT:
                 state.snake_turn(Direction.RIGHT)
-
             actual_direction = state.direction
 
-    state.step()
-    draw(state.snake, state.food, state.points)
+
+    else:
+        if game_state == RUNNING:
+            initial_tail_position = state.snake[0]
+            initial_foretail_position = state.snake[1]
+
+            state.step()
+
+            end_tail_position = state.snake[0]
+            end_foretail_position = state.snake[1]
+
+            draw(state.snake, state.food, state.points, state.direction)
+
+        elif game_state == PAUSE:
+            pause_the_game()
+

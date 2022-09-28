@@ -3,16 +3,17 @@ from position import Position
 from random import randint
 
 INITIAL_SNAKE = [
-    Position(1, 3),
-    Position(2, 3),
-    Position(3, 3)
+    Position(-1, 2),
+    Position(0, 2),
+    Position(1, 2)
 ]
 INITIAL_DIRECTION = Direction.RIGHT
 INITIAL_POINTS = 0
+INITIAL_SPEED=10
 
 
 class GameState:
-    def __init__(self, snake=None, direction=INITIAL_DIRECTION, food=None, field_size=20, points=INITIAL_POINTS):
+    def __init__(self, snake=None, direction=INITIAL_DIRECTION, food=None, field_size=20, points=INITIAL_POINTS, speed=INITIAL_SPEED):
         if snake is None:
             snake = INITIAL_SNAKE[:]
 
@@ -20,6 +21,7 @@ class GameState:
         self.direction = direction
         self.field_size = field_size
         self.points = points
+        self.speed = speed
 
         if food == None:
             self.set_new_random_food_position()
@@ -31,6 +33,7 @@ class GameState:
         self.direction = INITIAL_DIRECTION
         self.set_new_random_food_position()
         self.points = INITIAL_POINTS
+        self.speed = INITIAL_SPEED
 
     def next_head(self, direction):
         pos = self.snake[-1]
@@ -71,5 +74,7 @@ class GameState:
         if new_head == self.food:
             self.set_new_random_food_position()
             self.points += 1
+            self.speed += 1/2
         else:
             self.snake = self.snake[1:]
+

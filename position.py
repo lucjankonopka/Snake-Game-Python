@@ -3,6 +3,7 @@ class Position:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.position = (x,y)
 
     def __eq__(self, other):
         return isinstance(other, Position) and \
@@ -12,7 +13,9 @@ class Position:
     def __str__(self):
       return f"({self.x}, {self.y})"
 
+    def __getitem__(self, key):
+        return self.position[key]
+
     __repr__ = __str__
 
-position = Position(0,0)
-print(position)
+
