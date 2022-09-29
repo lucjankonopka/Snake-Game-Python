@@ -1,8 +1,7 @@
-from multiprocessing.pool import RUN
 import pygame
 from position import Position
 from direction import Direction
-from game_state import GameState
+from game_state import GameState, RUNNING, PAUSED, GAMEOVER
 
 pygame.init()
 
@@ -50,7 +49,7 @@ initial_foretail_position = state.snake[1]
 end_foretail_position = state.snake[1]
 
 
-def pause_the_game():
+def display_pause_screen():
     text_upper = 'Game paused!'
     text_lower = 'Press "space" to continue.'
     pause_upper_text = pygame.font.SysFont(
@@ -67,9 +66,9 @@ def pause_the_game():
     pygame.display.update()
 
 
-def game_over():
+def display_game_over():
     text_upper = 'Game Over!'
-    text_middle = f'Your score: {actual_score}.'
+    text_middle = f'Your score: {state.points}.'
     text_lower = 'Do you want to play again? (y/n)'
     lost_upper_text = pygame.font.SysFont(
         'Consolas', 32).render(text_upper, True, BLACK)
@@ -234,21 +233,30 @@ draw(snake, food, actual_score, actual_direction)
 state.set_initial_position()
 
 clock = pygame.time.Clock()
-RUNNING, PAUSE = 0, 1
-game_state = RUNNING
 
 while True:
+
     clock.tick(game_speed)
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit()
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                game_state = PAUSE
-            elif event.key == pygame.K_SPACE:
-                game_state = RUNNING
+            if event.key == pygame.K_p and state.set_status == "RUNNING":
+                state.set_status = "PAUSED"
+                print(state.set_status)
+                continue
+            elif event.key == pygame.K_SPACE and state.set_status == "PAUSED":
+                state.set_status = "RUNNING"
+                print(state.set_status)
+                continue
+            elif event.key == pygame.K_n and state.set_status == "GAMEOVER":
+                quit()
+            if event.key == pygame.K_y and state.set_status == "GAMEOVER":
+                state.set_status = "RUNNING"
+                state.new_game()
+                continue
             elif event.key == pygame.K_q:
                 quit()
             elif event.key == pygame.K_UP:
@@ -261,19 +269,23 @@ while True:
                 state.snake_turn(Direction.RIGHT)
             actual_direction = state.direction
 
+    if state.set_status == "RUNNING":
+    
+        initial_tail_position = state.snake[0]
+        initial_foretail_position = state.snake[1]
 
-    else:
-        if game_state == RUNNING:
-            initial_tail_position = state.snake[0]
-            initial_foretail_position = state.snake[1]
+        state.step()
 
-            state.step()
+        end_tail_position = state.snake[0]
+        end_foretail_position = state.snake[1]
 
-            end_tail_position = state.snake[0]
-            end_foretail_position = state.snake[1]
+        draw(state.snake, state.food, state.points, state.direction)
 
-            draw(state.snake, state.food, state.points, state.direction)
+    elif state.set_status == "GAMEOVER":
+        display_game_over()
+                
+    elif state.set_status == "PAUSED":
+        display_pause_screen()
+        
 
-        elif game_state == PAUSE:
-            pause_the_game()
-
+    

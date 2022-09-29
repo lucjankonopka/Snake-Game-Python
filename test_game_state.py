@@ -220,7 +220,8 @@ class GameStateTest(unittest.TestCase):
             ],
             direction=Direction.UP,
             food=Position(3, 1),
-            field_size=25
+            field_size=25,
+            set_status=RUNNING
         )
 
         state.step()
@@ -231,6 +232,9 @@ class GameStateTest(unittest.TestCase):
         from game_state import INITIAL_DIRECTION
         self.assertEqual(INITIAL_DIRECTION, state.direction)
         self.assertEqual(25, state.field_size)
+        from game_state import RUNNING, GAMEOVER
+        self.assertEqual(GAMEOVER, state.set_status)
+        
 
 
     def test_snake_turn(self):

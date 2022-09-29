@@ -10,10 +10,10 @@ INITIAL_SNAKE = [
 INITIAL_DIRECTION = Direction.RIGHT
 INITIAL_POINTS = 0
 INITIAL_SPEED=10
-
+RUNNING, PAUSED, GAMEOVER = "RUNNING", "PAUSED", "GAMEOVER"
 
 class GameState:
-    def __init__(self, snake=None, direction=INITIAL_DIRECTION, food=None, field_size=20, points=INITIAL_POINTS, speed=INITIAL_SPEED):
+    def __init__(self, snake=None, direction=INITIAL_DIRECTION, food=None, field_size=20, points=INITIAL_POINTS, speed=INITIAL_SPEED, set_status=RUNNING):
         if snake is None:
             snake = INITIAL_SNAKE[:]
 
@@ -22,6 +22,7 @@ class GameState:
         self.field_size = field_size
         self.points = points
         self.speed = speed
+        self.set_status = set_status
 
         if food == None:
             self.set_new_random_food_position()
@@ -34,6 +35,12 @@ class GameState:
         self.set_new_random_food_position()
         self.points = INITIAL_POINTS
         self.speed = INITIAL_SPEED
+
+    def new_game(self):
+        set_status = RUNNING
+        self.set_initial_position()
+        return set_status
+
 
     def next_head(self, direction):
         pos = self.snake[-1]
@@ -67,8 +74,8 @@ class GameState:
 
         collision = new_head in self.snake
         if collision:
-            self.set_initial_position()
-            return
+            self.set_status = GAMEOVER
+            return 
 
         self.snake.append(new_head)
         if new_head == self.food:
