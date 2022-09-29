@@ -1,4 +1,4 @@
-from game_state import GameState
+from game_state import RUNNING, GameState
 from direction import Direction
 from position import Position
 import unittest
@@ -209,6 +209,7 @@ class GameStateTest(unittest.TestCase):
         self.assertFalse(state.food in state.snake)
         self.assertEqual(expected_points, state.points)
 
+
     def test_snake_death(self):
         state = GameState(
             snake=[
@@ -226,15 +227,9 @@ class GameStateTest(unittest.TestCase):
 
         state.step()
 
-        from game_state import INITIAL_SNAKE
-        self.assertEqual(INITIAL_SNAKE, state.snake)
-        self.assertFalse(state.food in state.snake)
-        from game_state import INITIAL_DIRECTION
-        self.assertEqual(INITIAL_DIRECTION, state.direction)
-        self.assertEqual(25, state.field_size)
-        from game_state import RUNNING, GAMEOVER
+        from game_state import GAMEOVER
         self.assertEqual(GAMEOVER, state.set_status)
-        
+        self.assertFalse(state.food in state.snake)
 
 
     def test_snake_turn(self):
