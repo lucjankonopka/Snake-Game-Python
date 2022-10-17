@@ -30,7 +30,7 @@ snake = [
     Position(1, 2)
 ]
 
-food = Position(-1,-1)
+food = Position(-1, -1)
 
 state = GameState(
     snake=None,
@@ -133,7 +133,7 @@ def draw_snake_tail(pos):
                      [pos.x * CUBE_SIZE, pos.y * CUBE_SIZE], [pos.x * CUBE_SIZE, pos.y * CUBE_SIZE]]
     # UP
     if (check_snake_tail_actual_movement() == 'up' and check_snake_foretail_actual_movement() == 'up') \
-        or (check_snake_foretail_actual_movement() == 'up' and (check_snake_tail_actual_movement() == 'right' or check_snake_tail_actual_movement() == 'left')):
+            or (check_snake_foretail_actual_movement() == 'up' and (check_snake_tail_actual_movement() == 'right' or check_snake_tail_actual_movement() == 'left')):
         tail_position[1][0] += CUBE_SIZE - 1
         tail_position[2][0] += 3/4*CUBE_SIZE
         tail_position[2][1] += CUBE_SIZE
@@ -141,7 +141,7 @@ def draw_snake_tail(pos):
         tail_position[3][1] += CUBE_SIZE
         # DOWN
     elif (check_snake_tail_actual_movement() == 'down' and check_snake_foretail_actual_movement() == 'down') \
-        or (check_snake_foretail_actual_movement() == 'down' and (check_snake_tail_actual_movement() == 'right' or check_snake_tail_actual_movement() == 'left')):
+            or (check_snake_foretail_actual_movement() == 'down' and (check_snake_tail_actual_movement() == 'right' or check_snake_tail_actual_movement() == 'left')):
         tail_position[0][1] += CUBE_SIZE
         tail_position[1][0] += 1/4*CUBE_SIZE
         tail_position[2][0] += 3/4*CUBE_SIZE
@@ -149,7 +149,7 @@ def draw_snake_tail(pos):
         tail_position[3][1] += CUBE_SIZE
         # LEFT
     elif check_snake_tail_actual_movement() == 'left' \
-        or (check_snake_foretail_actual_movement() == 'left' and (check_snake_tail_actual_movement() == 'up' or check_snake_tail_actual_movement() == 'down')):
+            or (check_snake_foretail_actual_movement() == 'left' and (check_snake_tail_actual_movement() == 'up' or check_snake_tail_actual_movement() == 'down')):
         tail_position[1][0] += CUBE_SIZE
         tail_position[1][1] += 1/4*CUBE_SIZE
         tail_position[2][0] += CUBE_SIZE
@@ -157,7 +157,7 @@ def draw_snake_tail(pos):
         tail_position[3][1] += CUBE_SIZE
         # RIGHT
     elif check_snake_tail_actual_movement() == 'right' \
-        or (check_snake_foretail_actual_movement() == 'right' and (check_snake_tail_actual_movement() == 'up' or check_snake_tail_actual_movement() == 'down')):
+            or (check_snake_foretail_actual_movement() == 'right' and (check_snake_tail_actual_movement() == 'up' or check_snake_tail_actual_movement() == 'down')):
         tail_position[0][0] += CUBE_SIZE
         tail_position[1][1] += 1/4*CUBE_SIZE
         tail_position[2][1] += 3/4*CUBE_SIZE
@@ -270,7 +270,7 @@ while True:
             actual_direction = state.direction
 
     if state.set_status == "RUNNING":
-    
+
         initial_tail_position = state.snake[0]
         initial_foretail_position = state.snake[1]
 
@@ -283,9 +283,6 @@ while True:
 
     elif state.set_status == "GAMEOVER":
         display_game_over()
-                
+
     elif state.set_status == "PAUSED":
         display_pause_screen()
-        
-
-    
