@@ -3,9 +3,9 @@ from position import Position
 from random import randint
 
 INITIAL_SNAKE = [
-    Position(1, 2),
-    Position(2, 2),
-    Position(3, 2)
+    Position(2, 3),
+    Position(3, 3),
+    Position(4, 3)
 ]
 INITIAL_DIRECTION = Direction.RIGHT
 INITIAL_POINTS = 0
